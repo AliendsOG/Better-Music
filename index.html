@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="
+  default-src 'self'; 
+  script-src 'self' 'unsafe-inline'; 
+  style-src 'self' 'unsafe-inline'; 
+  img-src 'self' data: asset: blob:; 
+  media-src 'self' blob: asset:;
+  connect-src 'self';
+">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="ceva.css" />
+    <link rel="stylesheet" href="style-desktop.css" />
+    <script src="script.js" defer></script>
+    <link href="css/bootstrap.min.css" rel="stylesheet" >
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <title>Better Music</title>
+</head>
+<body style="background-color:rgba(131, 36, 194, 0.91);" id="body">
+    <div class="content">
+        <!-- Navbar -->
+        <div class="navbare navbar container-fluid glossy fixed-top " id="navbar">
+            <div class="container justify-content-center carousel">
+                <div class="navbar-carousel-wrapper" id="navbar">
+                    <button class="navbar-link" id="current-page" name="home"  onclick = Navbar_button(id) style="opacity: 40%;">
+                        <p class="navbar-text">Home</p>
+                    </button>
+                    <button class="navbar-link" id="fav" name="fav" onclick = Navbar_button(id)>
+                        <p class="navbar-text">Favorites</p>
+                    </button>
+                    <button class="navbar-link" id="playlists" name="playlists"  onclick = Navbar_button(id)>
+                        <p class="navbar-text">Playlists</p>
+                    </button>
+                    <button class="navbar-link" id="artists" name="artists" onclick = Navbar_button(id)>
+                        <p class="navbar-text">Artists</p>
+                    </button>
+                    <button class="navbar-link" id="albums" name="albums"  onclick = Navbar_button(id)>
+                        <p class="navbar-text">Albums</p>
+                    </button>
+                    <button class="navbar-link import-button" id="import" onclick="handleFolderSelection()">
+                        <p class="navbar-text import-text">Import</p>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- navbar ends here -->
+         <!-- here the song cards and the page is loaded by js -->
+        <div id="sections" class="sections" style="height: 2000px;">
+        </div>
+        <div class="modal fade" id="ceva" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog album-layout container-fluid p-0"  >
+            <div class="modal-content album-layout-content container-fluid p-0">
+                <div class="modal-header p-0 glossy">
+                    <div class="album-info d-flex container-fluid">
+                        <img class="album-cover-layout glossy" id="modal_album_src" src="img/cover.jpg" alt="album-cover">
+                        <div class="album-details col">
+                            <p class="album-name" id="modal_album">Album</p>
+                            <p class="artist-name" id="modal_artist">Artist</p>
+                            <p class="band-name" id="modal_song_nr">12 Songs</p>
+                            <p></p>
+                        </div>
+                        <button class="exit_button glossy justify-content-center" data-bs-dismiss="modal">
+                            <p class="m-2 exit_icon band-name">X</p>
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-body p-0 glossy">
+                    <div class="song-list" id="modal_song_list">
+                        <div class="list-label d-flex">
+                            <p class="col-1 band-name">#</p>
+                            <p class="col band-name">Title</p>
+                            <p class="col-2 band-name">Plays</p>
+                            <p class="col-1 band-name">Length</p>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+        <!-- music player at the bottom -->
+        <div class="music-player glossy container-fluid fixed-bottom navbar">
+            <audio id="player" src=""></audio>
+            <div class="col-3 song-info-div d-flex align-content-center">
+                <img class="album-cover" src="img/stock cover.jpg" alt="album art" id="album_art">
+                <div class="control-song-details">
+                    <p class="song-name song-name-player" id="song_name_player">Song</p>
+                    <p class="band-name band-name-player" id="band_name_player">Band</p>
+                </div>
+                <img class="m-3 music-control-icon align-self-center" src="img/fav_icon.svg" id="fav_icon" onclick=add_to_fav(id) alt="favorite toggle">
+            </div>
+            <div class="audio-controls justify-content-center col d-flex container">
+                <div class="control-buttons align-content-center" id="control-buttons">
+                    <button class="shuffle-button music-control-button navbar-link " id="shuffle-button" onclick=Shuffle()>
+                        <img class="shuffle-icon music-control-icon" src="img/control_shuffle_off.svg" alt="shuffle" id="shuffle-icon">
+                    </button>
+                    <button class="previous-button music-control-button " id="previous-button" onclick=Previous()>
+                        <img class="previous-icon music-control-icon" src="img/control_previous.svg" alt="Previous" id="previous-icon">
+                    </button>
+                    <button class="play-pause-button music-control-button " id="play-pause-button" onclick=playPause()>
+                        <img class="play-pause-icon music-control-icon" src="img/control_play.svg" alt="Play" id="play-icon">
+                    </button>
+                    <button class="next-button music-control-button " id="next-button" onclick=Next()>
+                        <img class="next-icon music-control-icon" src="img/control_next.svg" alt="Next" id="next-icon">
+                    </button>
+                    <button class="repeat-button music-control-button " id="repeat-button" onclick=Repeat()>
+                        <img class="repeat-icon music-control-icon" src="img/control_repeat.svg" alt="Repeat" id="repeat-icon">
+                    </button>
+                </div>
+                <div class="progress-bar-div container-fluid row p-0">
+                    <p class="time-text m-0" id="current-time">0:00</p>
+                    <input class="p-0 m-0 progress-bar col" type="range" id="progress-bar" min="0" max="1000" value="0" />
+                    <p class="time-text m-0" id="duration-time">0:00</p>
+                </div>
+            </div>
+            <div class="col-3 " id="queue-stuff-div"> 
+                <img class="m-2 music-control-icon queue-icon" src="img/queue.svg" alt="queue" onclick="queue_button()" data-bs-toggle="modal" data-bs-target="#ceva">
+                
+            </div>
+        </div>
+
+        <div class="footer glossy container-fluid">
+            <h2 class="section-text">Better Music</h2>
+        </div>
+    </div>
+    <!-- background elements -->
+    <div class="circle eclipse1" ></div>
+    <div class="circle2 eclipse2"></div>
+</body>
+</html>
