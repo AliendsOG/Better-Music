@@ -1,0 +1,102 @@
+.navbar-carousel-wrapper {
+    display: flex !important;
+    flex-wrap: nowrap !important; 
+    overflow-x: auto!important; 
+    -webkit-overflow-scrolling: touch !important; 
+    scrollbar-width: none !important; 
+    mask-image: linear-gradient(to right, transparent 0%, black 3%, black 97%, transparent 100%) !important;
+}
+.content{
+    margin-left: 10px !important;
+    margin-right: 10px !important;
+}    
+.section{
+    top: 10px ;
+    height: 382px;
+}
+.navbare{
+    position: fixed !important;
+    bottom: 10px !important;
+    margin-left: 10px !important;
+    margin-right: 10px !important;
+    height: 54px;
+    padding: 0px !important;
+}
+.navbar-text{
+    font-size: 20px;
+    line-height: 22px;
+    margin-bottom:0px ;
+    margin-left: 8px;
+    margin-right: 8px;
+
+}
+.navbar-link{
+    height: 22px;
+}
+.music-player{
+    bottom: 74px !important;
+    margin-left: 10px !important;
+    margin-right: 10px !important;
+    height: 60px;
+    padding: 10px !important;
+}
+.audio-controls{
+    margin-top: 1px;
+}
+.play-pause-button{
+    height: 30px;
+    width: 30px;
+}
+.music-control-button{
+    padding-left: 5px !important;
+    padding-right: 5px!important;
+    padding: 0px;
+}
+.album-cover{
+    height: 40px;
+}
+.music-control-icon{
+    width: auto !important;
+    height: 20px!important;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    top:-3.5px;
+    left: 1px;
+}
+.song-card{
+    width: 200px;
+    height: 250px;
+}
+.song-name {
+    font-size: 20px;
+    line-height: 24px;
+}
+.band-name{
+    font-size: 14px;
+    line-height: 16px;
+}
+.song-card:hover .play-button {
+    opacity: 1; 
+    height:35px;
+    width:100%;
+}
+.song-card:hover .play-button-icon{
+    width: 18px!important;
+    margin-top: auto !important;
+    margin-bottom: 2px!important;
+}
+.carousel-wrapper{
+    padding: 15px;
+    border-radius: 0px;
+    padding-top:22px;
+    padding-bottom: 22px;
+}
+.section-text{
+    font-size: 32px;
+}
+.song-card:hover {
+    transform: scale(1.03);
+}
+.glossy{
+    box-shadow: 1px 1px 11px 7px rgba(0, 0, 0, 0.25), inset 0 0 0 1px var(--stroke-glassy) !important;
+} 

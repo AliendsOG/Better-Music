@@ -1,0 +1,409 @@
+:root {
+  --primary: rgba(131, 36, 194, 0.91);
+  --stroke-glassy: rgba(189, 189, 189, 0.25); 
+  --navbar: rgba(23, 23, 26, 0.486);  
+  --circle2:rgba(252, 105, 0, 0.99);
+  --circle1:rgb(39, 241, 241);
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('assets/font/Inter-VariableFont_opsz,wght.ttf') format('truetype');
+  font-weight: 100 900; /* all weights supported */
+  font-style: normal;
+}
+body.modal-open {
+    padding-right: 0px !important;
+    overflow: auto !important; /* Optional: keeps the scrollbar visible */
+}
+.content{
+    z-index: 1;
+    position: relative;
+}
+.circle .circle2{
+    z-index:0;
+    position: relative;
+}
+.glossy{
+    background-color: var(--navbar)!important;
+    border-radius: 23px ;
+    backdrop-filter: blur(24px)!important;
+}
+.section-text{
+    color:white !important;
+    font-family: "Inter", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 600;
+    font-style: normal;
+    margin: 0px;
+    margin-bottom: 0px !important;
+}
+
+.song-card{
+    padding: 12px;
+    padding-bottom: 0px;
+    position: relative; 
+    transition: transform 0.2s ease-out, box-shadow 0.3s ease-out;
+    flex-shrink: 0; 
+    margin-right: 24px;
+    contain: paint;
+    background-color: rgba(0,0,0,0.001);
+    cursor: pointer;
+
+}
+.song-card-shell {
+  background: transparent;
+}
+.cover{
+    box-shadow: 3px 3px 10px 2px rgba(0, 0, 0, 0.25), inset 0 0 0 1px var(--stroke-glassy) !important;
+    border-radius: 11px !important;
+}
+.song-name {
+    color: white;
+    font-family: "Inter", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 500;
+    font-style: normal;
+    margin: 0px;
+}
+.band-name{
+    color: rgba(255, 255, 255, 0.7);
+    font-family: "Inter", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+    margin: 0px;
+    margin-top: 2px;
+}
+.song-details{
+    margin: 0px;
+    padding: 0px;
+    margin-bottom: 5px;
+    margin-top: 5px;
+}
+.play-button{
+    border-radius:11px;
+    background-color:var(--primary);
+    border-width: 1px !important;
+    border-color: var(--stroke-glassy) !important;
+    border-style: solid !important;
+    height:0px;
+    width:100% ;
+    margin-bottom: 0px;
+    opacity: 0;
+    transition: 0.32s ease-in, 0.15s ease-out;
+    padding: 0;
+    pointer-events: none;
+    justify-self: center;
+}
+.play-button:hover{
+    scale: 1.03;
+}
+.play-button:active{
+    scale: .94;
+}
+.play-button-icon{
+    width: 0px;
+}
+.song-card:hover .song-details{
+    margin-bottom: 8px;
+}
+/* transformare card pt album */
+.modal-header{
+    border: none!important;
+}
+.modal-backdrop {
+    z-index: 0 !important;
+    opacity: 0!important;
+}
+.album-layout{
+    z-index:5 !important;
+}
+.album-cover-layout{
+    width: auto!important;
+}
+.edit-icon{
+    width: fit-content;
+    height: fit-content;
+    opacity: 0;
+    border-radius: 6px;
+    border-width: 0px;
+    padding: 0px;
+    transition: .1s;
+}
+.edit-icon-img{
+    width: 20px;
+    height: 20px;
+    margin: 12.5px;
+}
+.edit-text{
+    border-radius: 5px;
+    border-width: 0px;
+    padding: 0px;
+    transition-duration: .2s;
+    width: fit-content;
+    height: fit-content;
+    opacity: 0.5;
+}
+.edit-icon-perm{
+    opacity: 1;
+    border-radius: 11px;
+}
+.save-btn{
+    height: 45px;
+    margin-left:3px ;
+}
+.album-img:hover .edit-icon{
+    opacity: 1;
+}   
+.cover-btn{
+    width: fit-content;
+    border-radius: 11px ;
+    border: none;
+    margin-top: 5px;
+    transition: .2s;
+}
+.cover-btn:hover{
+    transform: scale(1.1);
+    background-color: var(--primary) !important;
+}
+.cover-btn:hover .band-name{
+    color: white;
+}
+.cover-btn:active{
+    transform: scale(0.9);
+}
+.edit-icon:hover{
+    transform:scale(1.1);
+    background-color: var(--primary) !important;
+}
+.edit-icon:hover .exit_icon{
+    color: white;
+}
+.edit-icon:active{
+    transform:scale(0.9);
+}
+.album-cover-layout:hover{
+    opacity:0.85;
+}
+.queue-cover:hover{
+    opacity: 1 !important;
+}
+.album-name:hover .edit-text{
+    opacity: 1;
+}
+.album-name{
+    color: white;
+    font-family: "Inter", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 500;
+    font-style: normal;
+}
+.artist-name{
+    color: white;
+    font-family: "Inter", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal; 
+}
+
+.song-item{
+    transition: 0.2s;
+    background-color: transparent!important;
+    cursor: pointer;
+}
+.exit_button{
+    border-radius: 11px;
+    border: none;
+    transition: 0.2s;
+}
+.exit_button:hover{
+    background-color: var(--primary) !important;
+}
+.exit_button:hover .exit_icon{
+    color: white;
+}
+.playlist-input{
+    border-radius: 11px;
+    border: none;
+    padding: 5px;
+    margin-top: 5px;
+    margin-bottom: 11px;
+    color: white;
+}
+.save-button{
+    transition: 0.2s;
+    background-color: var(--navbar) !important;
+}
+.save-button:hover{
+    transform: scale(1.1);
+    background-color: var(--primary) !important;
+}
+.save-button:active{
+    transform: scale(0.9);
+}
+.carousel{
+    overflow: hidden; 
+    padding: 0px;
+}
+.carousel-wrapper {
+    display: flex !important;
+    flex-wrap: nowrap !important; 
+    overflow-x: auto!important; 
+    -webkit-overflow-scrolling: touch !important; 
+    scrollbar-width: none !important; 
+    mask-image: linear-gradient(to right, transparent 0%, black 2.31%, black 97.69%, transparent 100%) !important;
+}
+.carousel-wrapper::-webkit-scrollbar, .navbar-carousel-wrapper::-webkit-scrollbar {
+    display: none;
+}
+/* containeru cu totu principal */    
+.section{
+    position: relative;
+    padding: 0px !important;
+}
+.navbar{
+    z-index: 1069 !important;
+    height: 70px;
+    width: auto !important;
+    max-width: 100%!important;
+}
+.no-song{
+    height: fit-content !important;
+}
+.navbar-link{
+    background-color: transparent;
+    border: none;
+}
+.navbar-text{
+    color:white !important;
+    font-family: "Inter", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+    height: fit-content!important;
+    margin-bottom:0px;
+    padding: 0px!important;
+}
+.import-button{
+    border-radius: 11px;
+    padding: 0px;
+    border-radius:11px;
+    background-color:var(--primary);
+    border-width: 1px !important;
+    border-color: var(--stroke-glassy) !important;
+    border-style: solid !important;
+
+}  
+.music-player{
+    width: auto !important;
+    z-index: 1000;
+}
+.music-controls{
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom:0px;
+    bottom:0px;
+    
+}
+.control-buttons{
+    width: fit-content!important;
+    align-self: center!important;
+}
+.play-pause-button{
+    background-color: var(--primary)!important;
+    border: none;
+    border-radius: 50%;
+}
+.play-pause-button:hover {
+    box-shadow: 0px 0px 11px 2px var(--navbar);
+    transform: scale(1.0769);
+}
+.music-control-button:hover .music-control-icon{
+    opacity: 0.769;
+    transform: scale(1.0769);
+}
+.music-control-button:hover .play-pause-icon{
+    box-shadow:none;
+    opacity: 0.69;
+}
+.music-control-button{
+    background: transparent;
+    border:none;
+}
+.music-control-icon{
+    width: auto!important;
+    height: 21px!important;
+    position: relative;
+    transition: 0.1s;
+    cursor: pointer;
+}
+.song-info-div{
+    height: fit-content!important;
+}
+.album-cover{
+    border-radius: 11px;
+}
+.control-song-details{
+    margin-left: 10px;
+}
+.progress-bar-div{
+    margin-top: 8px !important;
+    margin-left: 0px !important;
+    margin-right: 0px !important;
+}
+.time-text{
+    color:white;
+    font-size: 13px;
+    width: fit-content!important;
+}
+.progress-bar{
+    accent-color: var(--primary);
+    cursor: pointer;
+}   
+
+.footer{
+    position: relative;
+    top:180px;
+    height: 200px;
+    align-items: center;
+    justify-content: center;
+    padding: 20px!important;
+    border-bottom-left-radius: 0px !important;
+    border-bottom-right-radius: 0px !important;
+}
+/* fundal */
+.circle {
+    width: 654px;
+    height: 654px;
+    border-radius: 50%;
+    background-color: var(--circle1);
+    filter: blur(300px);
+    position: fixed;
+    right: 17px;
+    top: -29px;
+}
+.circle2 {
+    width: 654px;
+    height: 654px;
+    border-radius: 50%;
+    background-color: var(--circle2);
+    filter: blur(300px);
+    position: fixed;
+    left: 83px;
+    top: 409px;
+}
+
+#playlist-modal {
+    pointer-events: auto !important; /* Ensure clicks are allowed */
+}
+
+#new-playlist-name {
+    pointer-events: auto !important;
+    user-select: text !important; /* Ensure Windows allows text selection */
+    -webkit-app-region: no-drag; /* CRITICAL: If your header is draggable, it can break inputs */
+}
+.modal-overlay, .modal-content, input {
+    -webkit-app-region: no-drag !important;
+}
+

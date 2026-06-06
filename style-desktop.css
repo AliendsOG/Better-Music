@@ -1,0 +1,332 @@
+:root{
+    --margin:69px;
+}
+.content{
+    margin-bottom: 250px ;
+}
+.glossy{
+    box-shadow: 3px 3px 22px 7px rgba(0, 0, 0, 0.25), inset 0 0 0 1px var(--stroke-glassy);
+} 
+.song-card{
+    width: 240px;
+    height: 300px;
+    box-shadow: 3px 3px 13px 7px rgba(0, 0, 0, 0.25), inset 0 0 0 1px var(--stroke-glassy);
+    transition: .2s;
+}
+.song-name {
+    font-size: 24px;
+    line-height: 27px;
+    white-space: nowrap;      /* Prevents text from wrapping to the second line */
+    overflow: hidden;         /* Hides the text that overflows the box */
+    text-overflow: ellipsis;  /* Adds the '...' at the end */
+    display: block;           /* Ensures the element behaves like a block for width */
+    max-width: 220px;
+}
+.band-name{
+    font-size: 16px;
+    line-height: 19px;
+}
+.import-button{
+    height: 40px;
+}
+.song-card:hover .play-button {
+    opacity: 1; 
+    height:45px;
+    width:100%;
+    pointer-events: auto; 
+}
+.song-card:hover .play-button-icon{
+    width: 25px;
+}
+.song-card:hover{
+    padding-bottom: 12px;
+    height: 100%;
+    transform: scale(1.107142);
+}
+.song-card:active{
+    transform: scale(1);
+}
+.carousel-wrapper{
+    padding: 39px;
+    padding-left: 40px;
+}
+.section-text{
+    font-size: 48px;
+}
+.no-song-text{
+    margin-top:120px;
+    margin-bottom: 2000px;
+}
+.playlist-pop-up{
+    width: 500px;
+    height: fit-content;
+    padding: 12px;
+}
+.input-div{
+    padding-right: 0px !important;
+    padding-left: 11px !important;
+}
+.edit-top-pop{
+    height: fit-content;
+}
+.edit-icon-over{
+    position: absolute;
+    left: 162px;
+    top: 17px;
+    border-radius: 8px;
+}
+.edit-buttons{
+    position: absolute;
+    right: 11px !important;
+    top: 168px;
+    left: auto;
+    height: fit-content;
+    width: fit-content;
+}
+.content{
+    margin-left: var(--margin) ;
+    margin-right: var(--margin) ;
+    padding: 0px;
+}   
+.section{
+    top: 115px;
+    height: 472px;
+    margin-bottom: -10px;
+}
+.navbare{
+    top: 34px !important;
+}
+.navbar{
+    margin-left:  var(--margin) !important;
+    margin-right:  var(--margin) !important;
+}
+.navbar-text{
+    font-size: 24px;
+    margin-left: 13px;
+    margin-right: 13px;
+
+}
+.music-player{
+    bottom: 10px !important;
+    padding: 12px!important;
+    height: 100px;
+    margin-left: var(--margin) !important;
+    margin-right: var(--margin) !important;
+}
+.play-pause-button{
+    height: 40px;
+    width: 40px;
+}
+.music-control-button{
+    margin-left: 10px;
+    margin-right: 10px;
+    height: 40px;
+}
+.album-cover{
+    height: 76px;
+}
+.music-control-icon{
+    width: auto !important;
+    height: 20px!important;
+    margin-top: 10px ;
+    margin-bottom: 10px;
+    top:-0.5px;
+}
+.modal-dialog{
+    margin-left: var(--margin) !important;
+    margin-top: 124px !important;
+    max-width: 100%!important;
+    margin-right: 39px !important;
+    margin-bottom: 130px !important;
+}
+.album-layout-content{
+    border-radius: 23px !important;
+    background-color: transparent !important;
+    border: none !important;
+}
+.modal-header{
+    border-radius: 23px !important;
+    border: none !important;
+    margin-bottom: 10px !important;
+}
+.song-list{
+    padding-top: 3px;
+}
+.nr-list{
+    padding-left: 10px;
+    padding-right: 50px;
+}
+.list-text{
+    padding-left: 5px;
+}
+.album-cover-layout{
+    height: 200px;
+    border-radius: 11px;
+}
+.artist-name{
+    font-size: 26px;
+}
+.album-name{
+    font-size: 52px;
+    white-space: nowrap;      /* Prevents text from wrapping to the second line */
+    overflow: hidden;         /* Hides the text that overflows the box */
+    text-overflow: ellipsis;  /* Adds the '...' at the end */
+    display: block;           /* Ensures the element behaves like a block for width */
+    max-width: 400px;
+    width: fit-content;
+    margin-bottom: 0px;
+}
+.list-label{
+    padding: 5px;
+    padding-bottom: 0px;
+}
+.exit_button{
+    width: 45px;
+    height: 45px;
+}
+.exit_button:hover{
+    transform: scale(1.1);
+}
+.exit_button:active{
+    transform: scale(0.9);
+}
+.save-button{
+    margin-top:31px;
+}
+.song-list{
+    padding-left: 11px;
+    padding-right: 11px;
+    padding-bottom: 5px;
+    border-radius: 22px;
+    margin: 1px;
+}
+.song-item{
+    padding: 5px;
+    border-radius: 11px;
+    height: 50px;
+    margin-top: 6px;
+    margin-bottom: 6px;
+}
+.song-item:hover{
+    transform: scale(1.015);
+    background-color: var(--primary) !important;
+}
+.song-item-cover{
+    border-radius: 6px;
+    height: 40px;
+}
+.album-details{
+    padding-left: 12px;
+}
+.queue-icon{
+    height: 22px;
+}
+.song-name-player{
+    white-space: nowrap;      /* Prevents text from wrapping to the second line */
+    overflow: hidden;         /* Hides the text that overflows the box */
+    text-overflow: ellipsis;  /* Adds the '...' at the end */
+    display: block;           /* Ensures the element behaves like a block for width */
+    max-width: 220px;
+}
+.album-info{
+    padding: 12px;
+}
+.fav_layout{
+    margin-top: 123px !important;
+}
+.album_layout{
+    margin-bottom: 20px;
+}
+.albm-gen_layout{
+    margin-top: 123px;
+}
+.layout-head{
+    margin-bottom: 20px;
+}
+.nr-track{
+    margin-left: 15px;
+}
+#edit_view{
+    display: flex;
+    flex-direction: column;
+}
+#edit_input{
+    width: 200px;
+    border-radius: 4px;
+    border-width: 0.5px;
+}
+@media(max-width:1000px) {
+    .navbar-text{
+        font-size: 24px;
+        line-height: 25px;
+        margin: 0px;
+    }
+    .import-button{
+        height: fit-content;
+        width: fit-content;
+        padding: 5px;
+    }
+    .navbar-link{
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    .song-name-player{
+        max-width: 80px;
+        font-size:18px
+    }
+    .band-name-player{
+        font-size:14px;
+    }
+}
+@media(min-width:1000px){
+    .album-name{
+        max-width: 600px;
+    }
+    .song-name-player{
+        max-width: 140px;
+        font-size:18px
+    }
+}
+@media(min-width:1210px){
+    .album-name{
+        max-width: 800px;
+    }
+    .song-name-player{
+        max-width: 180px;
+    }
+}
+@media(min-width:1410px){
+    .album-name{
+        max-width: 1000px;
+    }
+    .song-name-player{
+        max-width: 220px;
+        font-size: 24px;
+    }
+}
+@media(min-width:1610px){
+    .album-name{
+        max-width: 1200px;
+    }
+}
+@media(min-width:1810px){
+    .album-name{
+        max-width: 1400px;
+    }
+}
+@media(min-width:1910px){
+    .album-name{
+        max-width: 1450px;
+    }
+}
+@media(max-width:1200px){
+    :root{
+        --margin:30px;
+    }
+    .album-layout{
+        margin-right: 0px!important;
+    }
+    .navbare{
+        top: 17px !important;
+    }
+}

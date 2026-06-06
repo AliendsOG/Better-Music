@@ -22,9 +22,9 @@
 <body style="background-color:rgba(131, 36, 194, 0.91);" id="body">
     <div class="content">
         <!-- Navbar -->
-        <div class="navbare navbar container-fluid glossy fixed-top " id="navbar">
+        <div class="navbare navbar container-fluid glossy fixed-top " >
             <div class="container justify-content-center carousel">
-                <div class="navbar-carousel-wrapper" id="navbar">
+                <div class="navbar-carousel-wrapper">
                     <button class="navbar-link" id="current-page" name="home"  onclick = Navbar_button(id) style="opacity: 40%;">
                         <p class="navbar-text">Home</p>
                     </button>
@@ -41,51 +41,88 @@
                         <p class="navbar-text">Albums</p>
                     </button>
                     <button class="navbar-link import-button" id="import" onclick="handleFolderSelection()">
-                        <p class="navbar-text import-text">Import</p>
+                        <p class="navbar-text import-text">Add folders</p>
                     </button>
                 </div>
             </div>
         </div>
         <!-- navbar ends here -->
          <!-- here the song cards and the page is loaded by js -->
-        <div id="sections" class="sections" style="height: 2000px;">
+        <div id="sections" class="sections" >
         </div>
         <div class="modal fade" id="ceva" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog album-layout container-fluid p-0"  >
-            <div class="modal-content album-layout-content container-fluid p-0">
-                <div class="modal-header p-0 glossy">
-                    <div class="album-info d-flex container-fluid">
-                        <img class="album-cover-layout glossy" id="modal_album_src" src="img/cover.jpg" alt="album-cover">
-                        <div class="album-details col">
-                            <p class="album-name" id="modal_album">Album</p>
-                            <p class="artist-name" id="modal_artist">Artist</p>
-                            <p class="band-name" id="modal_song_nr">12 Songs</p>
-                            <p></p>
+            <div class="modal-dialog album-layout container-fluid p-0"  >
+                <div class="modal-content album-layout-content container-fluid p-0">
+                    <div class="modal-header p-0 glossy">
+                        <div class="album-info d-flex container-fluid">
+                            <div class="album-img">
+                                <img class="album-cover-layout glossy" id="modal_album_src" src="img/cover.jpg" alt="album-cover">
+                                <button class="edit-icon edit-icon-over glossy" id="edit_btn">
+                                    <img src="img/edit_icon.svg" alt="" class="edit-icon-img">
+                                </button>
+                            </div>
+                            <div class="album-details col">
+                                <p class="album-name " id="modal_album">Album</p>
+                                <div id="edit_view">
+                                    <p class="artist-name" id="modal_artist">Artist</p>
+                                    <p class="band-name" id="modal_song_nr">12 Songs</p>
+                                </div>
+                            </div>
+                            <button class="exit_button glossy justify-content-center" data-bs-dismiss="modal">
+                                <p class="m-2 exit_icon band-name">X</p>
+                            </button>
+                            <div id="edit_buttons" class="edit-buttons">
+                                <button class="edit-icon edit-icon-perm glossy" id="edit_btn_perm">
+                                    <img src="img/edit_icon.svg" alt="" class="edit-icon-img">
+                                </button>
+                            </div>
                         </div>
-                        <button class="exit_button glossy justify-content-center" data-bs-dismiss="modal">
-                            <p class="m-2 exit_icon band-name">X</p>
-                        </button>
                     </div>
-                </div>
-                <div class="modal-body p-0 glossy">
-                    <div class="song-list" id="modal_song_list">
-                        <div class="list-label d-flex">
-                            <p class="col-1 band-name">#</p>
-                            <p class="col band-name">Title</p>
-                            <p class="col-2 band-name">Plays</p>
-                            <p class="col-1 band-name">Length</p>
+                    <div class="modal-body p-0 glossy">
+                        <div class="song-list" id="modal_song_list">
+                            <div class="list-label d-flex">
+                                <p class="col-1 band-name">#</p>
+                                <p class="col band-name">Title</p>
+                                <p class="col-2 band-name">Plays</p>
+                                <p class="col-1 band-name">Length</p>
+                            </div>
+                            
                         </div>
-                        
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+        <!-- pop-up for changing the playlist name -->
+        <!-- <div class="playlist-pop-up glossy " id="playlist_pop_up" >
+            <div class="container d-flex p-0">
+                <img src="img/cover.jpg" alt="" class=" album-cover-layout  " id="pop_up_img">
+                <button class="edit-icon glossy" onclick="">
+                    <img src="img/edit_icon.svg" alt="" class="edit-icon-img">
+                </button>
+                <div class="container p-0 ">
+                    <div class="d-flex container-fluid p-0 edit-top-pop">
+                        <p class="artist-name col text-center">Edit details</p>
+                        <button class="exit_button glossy justify-content-center justify-self-end" onclick="">
+                            <p class="m-2 exit_icon band-name">X</p>
+                        </button>
+                    </div>
+                    <div class="container-fluid input-div ">
+                        <p class="song-name">Name</p>
+                        <input type="text" name="Playlist Name" id="pop_up_name" class="glossy playlist-input container-fluid" placeholder="Name...">
+                    </div>
+                    <div class="container-fluid p-0 justify-content-end d-flex  ">
+                        <button class="navbar-link import-button justify-self-end save-button " id="import" onclick="">
+                            <p class="navbar-text import-text ">Save</p>
+                        </button>
+                    </div>
+                </div>
+            </div>            
+        </div> -->
         <!-- music player at the bottom -->
         <div class="music-player glossy container-fluid fixed-bottom navbar">
             <audio id="player" src=""></audio>
             <div class="col-3 song-info-div d-flex align-content-center">
-                <img class="album-cover" src="img/stock cover.jpg" alt="album art" id="album_art">
+                <img class="album-cover glossy" src="img/stock cover.jpg" alt="album art" id="album_art">
                 <div class="control-song-details">
                     <p class="song-name song-name-player" id="song_name_player">Song</p>
                     <p class="band-name band-name-player" id="band_name_player">Band</p>
@@ -103,7 +140,7 @@
                     <button class="play-pause-button music-control-button " id="play-pause-button" onclick=playPause()>
                         <img class="play-pause-icon music-control-icon" src="img/control_play.svg" alt="Play" id="play-icon">
                     </button>
-                    <button class="next-button music-control-button " id="next-button" onclick=Next()>
+                    <button class="next-button music-control-button" id="next-button" onclick=Next()>
                         <img class="next-icon music-control-icon" src="img/control_next.svg" alt="Next" id="next-icon">
                     </button>
                     <button class="repeat-button music-control-button " id="repeat-button" onclick=Repeat()>
@@ -122,12 +159,12 @@
             </div>
         </div>
 
-        <div class="footer glossy container-fluid">
+        <!-- <div class="footer glossy container-fluid">
             <h2 class="section-text">Better Music</h2>
-        </div>
+        </div> -->
     </div>
     <!-- background elements -->
-    <div class="circle eclipse1" ></div>
-    <div class="circle2 eclipse2"></div>
+    <div class="circle"></div>
+    <div class="circle2"></div>
 </body>
 </html>
