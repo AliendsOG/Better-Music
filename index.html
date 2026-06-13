@@ -19,29 +19,30 @@
     <script src="js/bootstrap.bundle.min.js"></script>
     <title>Better Music</title>
 </head>
-<body style="background-color:rgba(131, 36, 194, 0.91);" id="body">
-    <div class="content">
+<body id="body">
+    <div class="content" id="content">
         <!-- Navbar -->
         <div class="navbare navbar container-fluid glossy fixed-top " >
             <div class="container justify-content-center carousel">
                 <div class="navbar-carousel-wrapper">
                     <button class="navbar-link" id="current-page" name="home"  onclick = Navbar_button(id) style="opacity: 40%;">
-                        <p class="navbar-text">Home</p>
+                        <img src="img/home_icon.svg" alt="home" class="nav-icon m-2">
                     </button>
                     <button class="navbar-link" id="fav" name="fav" onclick = Navbar_button(id)>
-                        <p class="navbar-text">Favorites</p>
+                        <img src="img/fav_icon.svg" alt="favorites" class="nav-icon m-2">
                     </button>
                     <button class="navbar-link" id="playlists" name="playlists"  onclick = Navbar_button(id)>
-                        <p class="navbar-text">Playlists</p>
+                        <img src="img/playlist_icon.svg" alt="playlists" class="nav-icon m-2">
                     </button>
                     <button class="navbar-link" id="artists" name="artists" onclick = Navbar_button(id)>
-                        <p class="navbar-text">Artists</p>
+                        <img src="img/artist_icon.svg" alt="artists" class="nav-icon m-2">
                     </button>
                     <button class="navbar-link" id="albums" name="albums"  onclick = Navbar_button(id)>
-                        <p class="navbar-text">Albums</p>
+                        <img src="img/album_icon.svg" alt="albums" class="nav-icon m-2">
                     </button>
-                    <button class="navbar-link import-button" id="import" onclick="handleFolderSelection()">
-                        <p class="navbar-text import-text">Add folders</p>
+                    <input class="search-input glossy text-white p-1" type="text" name="" id="search_box" placeholder="Search">
+                    <button class="navbar-link" id="settings" onclick="settings_page()" data-bs-toggle="modal" data-bs-target="#settings_modal">
+                        <img src="img/settings_icon.svg" alt="albums" class="nav-icon m-2">
                     </button>
                 </div>
             </div>
@@ -50,8 +51,8 @@
          <!-- here the song cards and the page is loaded by js -->
         <div id="sections" class="sections" >
         </div>
-        <div class="modal fade" id="ceva" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog album-layout container-fluid p-0"  >
+        <div class="modal fade " id="ceva" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog album-layout container-fluid p-0" id="album_layout_dialog" >
                 <div class="modal-content album-layout-content container-fluid p-0">
                     <div class="modal-header p-0 glossy">
                         <div class="album-info d-flex container-fluid">
@@ -92,32 +93,59 @@
                 </div>
             </div>
         </div>
-        <!-- pop-up for changing the playlist name -->
-        <!-- <div class="playlist-pop-up glossy " id="playlist_pop_up" >
-            <div class="container d-flex p-0">
-                <img src="img/cover.jpg" alt="" class=" album-cover-layout  " id="pop_up_img">
-                <button class="edit-icon glossy" onclick="">
-                    <img src="img/edit_icon.svg" alt="" class="edit-icon-img">
-                </button>
-                <div class="container p-0 ">
-                    <div class="d-flex container-fluid p-0 edit-top-pop">
-                        <p class="artist-name col text-center">Edit details</p>
-                        <button class="exit_button glossy justify-content-center justify-self-end" onclick="">
-                            <p class="m-2 exit_icon band-name">X</p>
-                        </button>
-                    </div>
-                    <div class="container-fluid input-div ">
-                        <p class="song-name">Name</p>
-                        <input type="text" name="Playlist Name" id="pop_up_name" class="glossy playlist-input container-fluid" placeholder="Name...">
-                    </div>
-                    <div class="container-fluid p-0 justify-content-end d-flex  ">
-                        <button class="navbar-link import-button justify-self-end save-button " id="import" onclick="">
-                            <p class="navbar-text import-text ">Save</p>
-                        </button>
+
+        <!-- search modal -->
+        <div class="modal fade" id="search" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog search_modal"  >
+                <div class="modal-content album-layout-content ">
+                    <div class="modal-body p-0 glossy ">
+                        <div class="search-list p-1" id="search_list">
+                            <div class="search-obj glossy constainer m-1 p-2 row">
+                                <img class="search-img glossy col-2 p-0" src="img/stock cover.jpg" alt="">
+                                <div class="col-8">
+                                    <p class="song-name">Name</p>
+                                    <p class="band-name">Type</p>
+                                </div>
+                                <button class="search-play col-2 "> <img class="play-txt" src="img/control_play.svg" alt="play button"></button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>            
-        </div> -->
+            </div>
+        </div>
+        <!-- settings modal -->
+         <div class="modal fade " id="settings_modal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog album-layout container-fluid p-0" id="settings_layout_dialog" >
+                <div class="modal-content album-layout-content container-fluid p-0">
+                    <div class="modal-header glossy">
+                        <p class="section-text">Settings</p>
+                    </div>
+                    <div class="modal-body p-3 glossy">
+                        <div class="container d-flex align-content-center p-0">
+                            <p class="song-name settings-txt m-2 align-self-center">Add new folder</p>
+                            <button class="navbar-link import-button m-2 align-self-center" id="import" onclick="handleFolderSelection()">
+                                <p class="navbar-text">Add folders</p>
+                            </button>
+                        </div>
+                        <div class="container p-0">
+                            <div class="container-fluid d-flex align-content-center p-0">
+                                <p class="song-name settings-txt m-2 align-self-center">Choose primary color</p>
+                                <input type="color" class="align-self-center" value="#8324c2" id="primary_color">
+                            </div>
+                            <div class="container-fluid d-flex align-content-center p-0">
+                                <p class="song-name settings-txt m-2 align-self-center">Choose secondary color 1</p>
+                                <input type="color" class="align-self-center" value="#fc6900" id="sec_color1">
+                            </div>
+                            <div class="container-fluid d-flex align-content-center p-0">
+                                <p class="song-name settings-txt m-2 align-self-center">Choose secondary color 2</p>
+                                <input type="color" class="align-self-center" value="#27f1f1" id="sec_color2">
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <!-- music player at the bottom -->
         <div class="music-player glossy container-fluid fixed-bottom navbar">
             <audio id="player" src=""></audio>
@@ -153,9 +181,9 @@
                     <p class="time-text m-0" id="duration-time">0:00</p>
                 </div>
             </div>
-            <div class="col-3 " id="queue-stuff-div"> 
+            <div class="col-3 d-flex " id="queue-stuff-div"> 
                 <img class="m-2 music-control-icon queue-icon" src="img/queue.svg" alt="queue" onclick="queue_button()" data-bs-toggle="modal" data-bs-target="#ceva">
-                
+                <p class="band-name text-white m-2">PQ</p>
             </div>
         </div>
 

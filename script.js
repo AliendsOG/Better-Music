@@ -14,6 +14,7 @@ let playlist_obj_list=[];
 let fav=[];
 let queue=[];
 let queue_index=0;
+let added_queue=0;
 let shuffledIndices = [];
 let shuffleStep = 0; // This tracks our position in the shuffled list
 let isShuffle = false;
@@ -26,6 +27,130 @@ let playlist_map ={};
 let fav_map = {};
 let song_search={};
 let artist_search =[];
+
+//search functionality starting
+
+//trie stuff
+class trie_node{
+    constructor(){
+        this.children={};
+        this.results=[];
+    }
+}
+class trie{
+    constructor(){
+        this.root=new trie_node();
+    }
+    /**
+     * Inserts an item into the Trie based on a searchable text key
+     * @param {string} text - The search string (e.g., song title or artist name)
+     * @param {Object} item - The full data object (song, album, playlist, artist)
+     * @param {string} type - 'song', 'album', 'artist', or 'playlist'
+     */
+    insert(text, item, type) {
+        if (!text) return;
+        
+        // Clean the string: lowercase it and trim spaces for consistent indexing
+        const cleanText = text.toLowerCase().trim();
+        let node = this.root;
+
+        // Loop through every character of the string
+        for (const char of cleanText) {
+            if (!node.children[char]) {
+                node.children[char] = new trie_node();
+            }
+            node = node.children[char];
+
+            // Attach the item reference to this node's results.
+            // This allows for "partial match autocomplete" (typing "b" returns everything starting with "b")
+            // To avoid duplicates from exact repetitive strings, verify by unique property
+            const exists = node.results.some(r => {
+                if (r.id && item.id) {
+                    return r.id === item.id && r.type === type;
+                }
+                // Fallback for ID-less items (like raw string categories)
+                return r.name === item.name && r.type === type;
+            });
+            if (!exists) {
+                node.results.push({ ...item, type }); // Pack type metadata
+            }
+        }
+    }
+    /**
+     * Searches the Trie for a given prefix
+     * @param {string} prefix - What the user is typing
+     * @returns {Array} List of all matching entities
+     */
+    search(prefix) {
+        if (!prefix) return [];
+        
+        const cleanPrefix = prefix.toLowerCase().trim();
+        let node = this.root;
+
+        for (const char of cleanPrefix) {
+            if (!node.children[char]) {
+                return []; // Prefix not found, return empty array
+            }
+            node = node.children[char];
+        }
+
+        // Return the gathered references sitting at this prefix node
+        return node.results;
+    }
+    /**
+     * Removes an item from the Trie using its specific text key path.
+     * @param {string} text - The original search text to remove (e.g., the OLD playlist name)
+     * @param {string|number} itemId - The unique ID of the object
+     * @param {string} type - 'playlist', 'song', 'album', or 'artist'
+     */
+    remove(text, itemId, type) {
+        if (!text) return;
+
+        const cleanText = text.toLowerCase().trim();
+        
+        // Recursive helper to walk down the tree path and prune from bottom-up
+        const pruneNode = (node, index) => {
+            if (!node) return false;
+
+            // 1. Filter out the item from this node's cached results array
+            node.results = node.results.filter(r => {
+                if (r.id && itemId) {
+                    return !(r.id === itemId && r.type === type);
+                }
+                return !(r.name === text && r.type === type); // Fallback for ID-less matching
+            });
+
+            // If we haven't reached the end of the text string, keep digging
+            if (index < cleanText.length) {
+                const char = cleanText[index];
+                const nextNode = node.children[char];
+                
+                if (nextNode) {
+                    // Drill down down to the next character node
+                    const shouldPruneChild = pruneNode(nextNode, index + 1);
+                    
+                    // If the child node reports it is completely empty, delete it!
+                    if (shouldPruneChild) {
+                        delete node.children[char];
+                    }
+                }
+            }
+
+            // 2. Garbage Collection: If this node has no remaining search results 
+            // AND has no child characters branching off it, tell the parent to delete it.
+            const hasChildren = Object.keys(node.children).length > 0;
+            const hasResults = node.results.length > 0;
+            
+            return !hasChildren && !hasResults;
+        };
+
+        // Start pruning from the root
+        pruneNode(this.root, 0);
+    }
+}
+
+
+const search_trie=new trie;
 async function handleFolderSelection() {
     // 1. Tell the Main process to open the Windows Folder Picker
     const folderPath = await window.api.selectFolder();
@@ -49,7 +174,13 @@ async function get_stuff() {
     const settings = await window.api.get_settings(); 
     // Now 'settings' is a real object like { isShuffle: true, repeatMode: 1 }
     isShuffle = settings.isShuffle;
-    repeatMode = settings.repeatMode; 
+    repeatMode = settings.repeatMode;
+    document.documentElement.style.setProperty("--primary", settings.pr_color);
+    document.documentElement.style.setProperty("--circle2", settings.sec_color1);
+    document.documentElement.style.setProperty("--circle1", settings.sec_color2);
+    document.getElementById("primary_color").value=settings.pr_color;
+    document.getElementById("sec_color1").value=settings.sec_color1;
+    document.getElementById("sec_color2").value=settings.sec_color2;
     for(let i=0;i<albums_obj_list.length;i++){
         let a=albums_obj_list[i];
         if(a.cover==null){
@@ -60,15 +191,19 @@ async function get_stuff() {
             song_map[songs[j].id]=songs[j];
             song_name_map[songs[j].name]=songs[j];
             song_search[i]=songs[j].name;
+            search_trie.insert(songs[j].name, songs[j], "song");
         }
         album_map[a.name]=a;
+        search_trie.insert(a.name,a ,"album");
     }
     for(let i=0;i<band_obj_list.length;i++){
         artist_map[band_obj_list[i].name]=band_obj_list[i];
         artist_search[i]=band_obj_list[i].name;
+        search_trie.insert(band_obj_list[i].name, band_obj_list[i] ,"artist");
     }
     for(let i=0;i<playlist_obj_list.length;i++){    
         playlist_map[playlist_obj_list[i].name]=playlist_obj_list[i];
+        search_trie.insert(playlist_obj_list[i].name, playlist_obj_list[i] ,"playlist");
     }
     for(let i=0;i<fav.length;i++){
         fav_map[fav[i].name]=fav[i];
@@ -80,8 +215,6 @@ async function get_stuff() {
         queue=ceva.queue;
     }   
     }
-    console.log("real playlist",playlist_obj_list)
-    console.log("songs:",song_map,"artist:", artist_map, "playlist:",playlist_map,"album:",album_map,"favs",fav_map);
 }
 function update_map(type, thing,i){
     if(type=="fav"){
@@ -93,8 +226,8 @@ function song_card(album, band_name, cover_src, song) {
     return `
     <div class="song-card-shell" data-type="album" data-album="${album}">
         <div class="song-card glossy" >
-            <div onclick="album_layout(id)" id="${album}" class="song-card-click"  data-bs-toggle="modal" data-bs-target="#ceva">
-                <img class="cover" src="${cover_src}" alt="${album} album cover" width="100%">
+            <div onclick="album_layout('${album}')" class="song-card-click"  data-bs-toggle="modal" data-bs-target="#ceva">
+                <img class="cover" src="${cover_src||"img/stock cover.jpg"}" alt="${album} album cover" width="100%">
                 <div class="song-details">
                     <p class="song-name">${album}</p>
                     <p class="band-name">${band_name}</p>
@@ -120,13 +253,13 @@ function album_list_item(song, cover_src,j, album){
     return `<div class="song-item d-flex glossy" >
                 <div class="col-9 d-flex da" onclick="Play('${song.name}','${album}')" data-id="${song.id}" data-type="song" data-title="${song.name}">
                     <p class="band-name p-2" ${e}>${j}</p>
-                    <img class="song-item-cover" src="${cover_src}" alt="album cover">
+                    <img class="song-item-cover" src="${cover_src||"img/stock cover.jpg"}" alt="album cover">
                     <div>
                         <p class="band-name list-text">${song.name}</p>
                         <p class="band-name list-text">${song.artist}</p>
                     </div>
                 </div>
-                <p class="col-1 band-name p-2" onclick="Play('${song.name}','${album}')">69</p> 
+                <p class="col-1 band-name p-2" onclick="Play('${song.name}','${album}')">${song.plays}</p> 
                 <img class="col-1 music-control-icon container-fluid" src="${icon}" id="${song.id}" onclick="add_to_fav(id)" alt="favorite toggle">
                 <p class="col-1 band-name p-2">${min}:${sec}</p>
             </div>`;
@@ -149,6 +282,20 @@ function album_layout(album_id){
         band= "You";
         songs =album.songs;
         cover_src=album.cover||"img/stock cover.jpg";
+    }
+    const win_height = window.innerHeight;
+    const elem_height = songs.length*56;
+    const content= document.getElementById("content").offsetHeight;
+    if((win_height-124-234-26-130)<(elem_height)){
+        document.getElementById("album_layout_dialog").style="margin-right:39px;";
+    }
+    else{
+        if(content>win_height){
+            document.getElementById("album_layout_dialog").style="margin-right:54px;";
+        }
+        else{
+            document.getElementById("album_layout_dialog").style="margin-right:69px;";
+        }
     }
     let layout_html=`<div class="list-label d-flex">
                         <div class="col-9 d-flex">
@@ -182,6 +329,53 @@ function album_layout(album_id){
     layout_html+=`</div> 
     </div>`;
     document.getElementById("modal_song_list").innerHTML=layout_html;
+}
+function search_item(cover, name, type,id){
+    let optional ="";
+    let altceva="";
+    if(type=="song"){
+        optional=`da`;
+        alceva = `data-type="song" data-title="${name}"`;
+    }
+    let layout= `
+    <div class="search-obj glossy constainer ${optional} m-1 p-2 row" ${alceva}>
+        <img class="search-img glossy col-2 p-0" src="${cover}" alt="">`;
+    if(type!="artist"){
+        let play="";
+        if(type=="album"){
+            let songs=album_map[name].song;
+            play=songs[0];
+        }else{
+            if(type=="playlist"){
+                let songs=playlist_map[name].songs;
+                play=songs[0];
+            }else{
+                if(type=="song"){
+                    play=song_map[id];
+                    optional="da";
+
+                }
+            }
+        }
+        layout+=`
+            <div class="col-8">
+                <p class="song-name">${name}</p>
+                <p class="band-name">${type}</p>
+            </div>
+            <button class="search-play col-2"> 
+                <img class="play-txt" src="img/control_play.svg" alt="play button"  name="${play.name}" onclick="Play(name,'${play.album}')">
+            </button>
+        </div>`;
+    }
+    else{
+        layout+=`
+            <div class="col-10">
+                <p class="song-name">${name}</p>
+                <p class="band-name">${type}</p>
+            </div>
+        </div>`;
+    }
+    return layout;
 }
 // creates the home page
 async function home_page(){
@@ -316,7 +510,6 @@ async function playlists_page(){
     let section_html =``;
     if(playlist_obj_list.length<1){
         section_html =`<p class="section-text no-song-text">No playlists created. Please create a playlist.</p>`;
-        
     }else{
         section_html =`
                 <div class="section container-fluid">
@@ -332,7 +525,26 @@ async function playlists_page(){
     }
     document.getElementById("sections").innerHTML = section_html;
 }
+async function settings_page() {
+    const win_height = window.innerHeight;
+    const elem_height =0;
+    const content= document.getElementById("content").offsetHeight;
+    if((win_height-150-130)<(elem_height)){
+        document.getElementById("settings_layout_dialog").style="margin-right:39px;";
+    }
+    else{
+        if(content>win_height-150-130){
+            document.getElementById("settings_layout_dialog").style="margin-right:54px;";
+        }
+        else{
+            document.getElementById("settings_layout_dialog").style="margin-right:69px;";
+        }
+    }
+    
+
+}
 function queue_button(){
+    console.log(queue,queue_index);
     let layout_html=`<div class="list-label d-flex">
                             <div class="col-9 d-flex">
                             <p class="band-name nr-list ">#</p>
@@ -348,15 +560,36 @@ function queue_button(){
     document.getElementById("modal_song_nr").innerText= queue.length-queue_index+" Songs";
     document.getElementById("modal_album_src").src="img/stock cover.jpg";
     document.getElementById("modal_album_src").classList="album-cover-layout glossy queue-cover";
+    document.getElementById("edit_buttons").innerHTML=`
+    <button class="edit-icon-perm edit-icon save-btn glossy justify-content-center p-1" onclick="clear_queue()">
+        <p class="m-2 exit_icon band-name">Clear queue</p>
+    </button>`;
     let i=1;
     for(let j=queue_index;j<queue.length;j++){
-        layout_html+=album_list_item(queue[j],queue[j].cover,i, queue[j].album);
+        layout_html+=album_list_item(queue[j],queue[j].cover,i, "queue");   
         cover="img/stock cover.jpg";
         i++;
     }
     layout_html+=`</div> 
     </div>`;
     document.getElementById("modal_song_list").innerHTML=layout_html;
+}
+function clear_queue(){
+    queue=[];
+    queue_index=0;
+    added_queue=0;
+    console.log(queue);
+    document.getElementById("modal_song_nr").innerText= 0+" Songs";
+    document.getElementById("modal_song_list").innerHTML=`
+    <div class="list-label d-flex">
+        <div class="col-9 d-flex">
+        <p class="band-name nr-list ">#</p>
+        <p class="band-name">Title</p>
+        </div>
+        <p class="col-2 band-name">Plays</p>
+        <p class="col-1 band-name">Length</p>
+    </div>
+    <p class="song-name m-2">No songs in queue</p>`;
 }
 // navbar button function that switches pages
 function Navbar_button(elem2) {
@@ -397,9 +630,13 @@ function finalizeHistoryLog(wasSkipped) {
         ms_played: msPlayed,
         skipped: wasSkipped
     });
+    if(msPlayed>=currentSongData.duration){
+        queue[queue_index].plays+=1;
+    }
     // Reset for next track
     currentSongData = null;
     songStartTime = null;
+    
 }
 let songStartTime = null;
 let currentSongData = null;
@@ -411,7 +648,8 @@ player.onloadedmetadata = () => {
         artist: queue[queue_index].artist || "Unknown Artist",
         album: queue[queue_index].album,
         path: queue[queue_index].path,
-        duration: player.duration || 0 
+        duration: player.duration || 0,
+        id: queue[queue_index].id
     };
 };
 function playPause(){
@@ -520,6 +758,7 @@ function Play(song_name, album){
     let album_queue=[];
     if(album==1) {
         album_queue=fav;
+        added_queue=0;
         for(let j=0; j<fav.length;j++){
             if(song_name==fav[j].name){
                 queue_index=j;
@@ -530,6 +769,7 @@ function Play(song_name, album){
     else{
         if(playlist_map[album]!=null){
             album_queue=playlist_map[album].songs;
+            added_queue=0;  
             for(let j=0; j<album_queue.length;j++){
                 if(song_name==album_queue[j].name){
                     queue_index=j;
@@ -540,6 +780,7 @@ function Play(song_name, album){
         else{
             if(album_map[album]!=null){
                 album_queue=album_map[album].song;
+                added_queue=0;
                 for(let j=0; j<album_queue.length;j++){
                     if(song_name==album_queue[j].name){
                         queue_index=j;
@@ -549,7 +790,10 @@ function Play(song_name, album){
             } 
         }
     }
-    if((queue!=album_queue)&&(album_queue[0]!=null)) queue=album_queue;
+    if((queue!=album_queue)&&(album_queue[0]!=null)){
+        queue=[...album_queue];
+        added_queue=0;
+    }
     update_player(queue[queue_index]);
 }
 function Repeat(){
@@ -567,7 +811,7 @@ function Repeat(){
         document.getElementById("repeat-icon").setAttribute("src","img/control_repeat.svg");
         repeatMode = 0;
     }
-    window.api.save_settings({ isShuffle, repeatMode });
+    window.api.save_settings({isShuffle, repeatMode, pr_color: pr_color.value, sec_color1: sec_color1.value, sec_color2: sec_color2.value, });
 }
 function Shuffle() {
     isShuffle = !isShuffle;
@@ -589,7 +833,7 @@ function Shuffle() {
     } else {
         icon.setAttribute("src", "img/control_shuffle_off.svg");
     }
-    window.api.save_settings({ isShuffle, repeatMode });
+    window.api.save_settings({isShuffle, repeatMode, pr_color: pr_color.value, sec_color1: sec_color1.value, sec_color2: sec_color2.value, });
 }
 async function add_to_fav(id) {
     let icon = document.getElementById("fav_icon");
@@ -686,22 +930,29 @@ function edit_view(name){
         let artist="";
         console.log(new_name, id, new_img, type);
         if(type =="playlist"){
-            if(new_img==null) new_img=playlist_map[name].cover;
+            if(new_img=="") new_img=playlist_map[name].cover;
             playlist_map[name].name=new_name;
             playlist_map[name].cover=new_img;
             artist = "You";
             const pl_obj= playlist_map[name];
             delete playlist_map[name];
             playlist_map[new_name]=pl_obj;
+            if(name!=new_name){
+            search_trie.remove(name,null,type);
+            search_trie.insert(new_name,pl_obj,type)
+        }
         }else{
             if(type =="album"){
-                if(new_img==null) new_img=album_map[name].cover;
+                if(new_img=="") new_img=album_map[name].cover;
                 album_map[name].name=new_name;
                 album_map[name].cover=new_img;
                 artist = album_map[name].artist;
                 const al_obj= album_map[name];
                 delete album_map[name];
                 album_map[new_name]=al_obj;
+                search_trie.remove(name,null,type);
+                search_trie.insert(new_name,al_obj,type)
+                id=name;
             }
         }
         await window.api.save_details({name: new_name, id: id, cover: new_img, type: type});
@@ -724,18 +975,25 @@ function edit_view(name){
 const bar = document.getElementById("progress-bar"); // Move outside for speed
 const currentTimeEl = document.getElementById("current-time");
 const durationEl = document.getElementById("duration-time");
+let dragging=false;
 player.addEventListener('timeupdate', () => {
     // 1. Fixed property name: must be 'currentTime'
     const { currentTime, duration } = player; 
     if (duration) {
         // 2. Update the slider value
-        bar.value = (currentTime / duration) * 1000;
+        if (!dragging) bar.value = (currentTime / duration) * 1000;
         // 3. Update the time text (assuming currentTimeEl and durationEl are defined)
-        currentTimeEl.innerText = formatTime(currentTime);
+        if (!dragging) currentTimeEl.innerText = formatTime(currentTime);
         durationEl.innerText = formatTime(duration);
     }
 });
 bar.addEventListener('input', () => {
+    dragging=true;
+    const seekTime = (bar.value / 1000) * player.duration;
+    currentTimeEl.innerText = formatTime(seekTime);
+});
+bar.addEventListener('change', () => {
+    dragging=false;
     // 1. Calculate the new time based on the slider's position
     const seekTime = (bar.value / 1000) * player.duration;
     // 2. Set the player's current time
@@ -818,7 +1076,7 @@ window.addEventListener('DOMContentLoaded',async () => {
     if(sec<10) sec="0"+sec;
     document.getElementById("duration-time").innerText=min+":"+sec;
 });    
-window.addEventListener('contextmenu', (e) => {
+window.addEventListener('contextmenu', (e) =>  {
     const target = e.target.closest('.da');
     if (target) {
         e.preventDefault();
@@ -830,6 +1088,59 @@ window.addEventListener('contextmenu', (e) => {
         window.api.showNativeMenu({ id: sId, title: sTitle });
     }
 });
+// Run this once when your app initializes
+window.api.add_to_queue((id) => {
+    console.log("Adding song to runtime queue:", id);
+    const new_song = song_map[id];
+    added_queue++;
+    queue.splice(queue_index+added_queue, 0, new_song);
+     
+});
+
+const pr_color = document.getElementById("primary_color");
+const sec_color1 = document.getElementById("sec_color1");
+const sec_color2 = document.getElementById("sec_color2");
+
+pr_color.addEventListener("input",()=>{
+    console.log(pr_color.value);
+    document.documentElement.style.setProperty("--primary", pr_color.value)
+    window.api.save_settings({isShuffle, repeatMode, pr_color: pr_color.value, sec_color1: sec_color1.value, sec_color2: sec_color2.value, });
+});
+sec_color1.addEventListener("input",()=>{
+    console.log(sec_color1.value);
+    document.documentElement.style.setProperty("--circle2", sec_color1.value)
+    window.api.save_settings({isShuffle, repeatMode, pr_color: pr_color.value, sec_color1: sec_color1.value, sec_color2: sec_color2.value, });
+    
+});
+sec_color2.addEventListener("input",()=>{
+    console.log(sec_color2.value);
+    document.documentElement.style.setProperty("--circle1", sec_color2.value)
+    window.api.save_settings({isShuffle, repeatMode, pr_color: pr_color.value, sec_color1: sec_color1.value, sec_color2: sec_color2.value, });
+});
 
 
+// search button function stuff
+const search_input = document.getElementById("search_box");
+const search_btn = document.getElementById("search_btn");
+const search_modal= document.getElementById('search');
+const search_modal_toggle = bootstrap.Modal.getOrCreateInstance(search_modal,{
+    focus:false
+});
 
+search_input.addEventListener("input", ()=>{
+    const query=search_input.value;
+    const results= search_trie.search(query);
+    const list= document.getElementById("search_list");
+    let layout=``;
+    for(let i=0; i<results.length; i++){
+        layout+= search_item(results[i].cover||"img/stock cover.jpg",results[i].name, results[i].type,results[i].id||null)
+    }
+    if(results.length==0){
+        layout=`
+        <p class="song-name m-2">No results</p>
+        `;
+    }
+    list.innerHTML=layout;
+    search_modal_toggle.show();
+    search_input.focus();
+});

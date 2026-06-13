@@ -23,5 +23,6 @@ contextBridge.exposeInMainWorld('api', {
     db_exists:()=> ipcRenderer.invoke('db-exists'),
     cover_handle:()=> ipcRenderer.invoke('select-playlist-cover'),
     save_details: (data) =>ipcRenderer.invoke('save-details',data),
+    add_to_queue: (callback) => ipcRenderer.on('add-to-queue', (event, ceva) => callback(ceva)),
 
 });

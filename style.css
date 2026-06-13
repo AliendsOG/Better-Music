@@ -1,15 +1,18 @@
 :root {
-  --primary: rgba(131, 36, 194, 0.91);
+  --primary: #8324c2e8;
   --stroke-glassy: rgba(189, 189, 189, 0.25); 
   --navbar: rgba(23, 23, 26, 0.486);  
-  --circle2:rgba(252, 105, 0, 0.99);
-  --circle1:rgb(39, 241, 241);
+  --circle2:#fa6800fc;
+  --circle1:#27f1f1;
 }
 @font-face {
   font-family: 'Inter';
   src: url('assets/font/Inter-VariableFont_opsz,wght.ttf') format('truetype');
   font-weight: 100 900; /* all weights supported */
   font-style: normal;
+}
+#body{
+    background-color: var(--primary);
 }
 body.modal-open {
     padding-right: 0px !important;
@@ -64,6 +67,9 @@ body.modal-open {
     font-weight: 500;
     font-style: normal;
     margin: 0px;
+}
+.settings-txt{
+    max-width: fit-content !important;
 }
 .band-name{
     color: rgba(255, 255, 255, 0.7);
@@ -150,7 +156,7 @@ body.modal-open {
 }
 .save-btn{
     height: 45px;
-    margin-left:3px ;
+    margin-left:3px;
 }
 .album-img:hover .edit-icon{
     opacity: 1;
@@ -294,6 +300,17 @@ body.modal-open {
     border-style: solid !important;
 
 }  
+
+.search-obj{
+    border-radius: 16px;
+}
+.search-play{
+    background-color: var(--primary);
+    border-radius: 9px;
+    border-width: 1px !important;
+    border-color: var(--stroke-glassy) !important;
+    border-style: solid !important;
+}
 .music-player{
     width: auto !important;
     z-index: 1000;

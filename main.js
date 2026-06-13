@@ -124,7 +124,8 @@ const setupDatabase = () => {
             duration REAL,
             track_number INT,
             favorite INTEGER DEFAULT 0,
-            fav_date TEXT
+            fav_date TEXT,
+            plays INTEGER DEFAULT 0
         )
     `).run();
 
@@ -153,7 +154,7 @@ function get_albume(albumName){
   try {
       // Use .all() to get an array of all matching songs
       const songs = db.prepare(`
-          SELECT song_name, song_path, duration, album, artist, favorite, song_id, cover_path
+          SELECT song_name, song_path, duration, album, artist, favorite, song_id, cover_path, plays
           FROM songs 
           WHERE album = ?
           ORDER BY track_number ASC
@@ -167,6 +168,7 @@ function get_albume(albumName){
         is_fav: row.favorite,
         id: row.song_id,
         cover: row.cover_path,
+        plays:row.plays
       }));
       return piese;
   } catch (error) {
@@ -339,7 +341,7 @@ const loadPlayback = () => {
 };
 ipcMain.handle('favs', async()=>{
     const favs= db.prepare(`
-          SELECT song_name, song_path, duration, album, cover_path, artist, favorite, fav_date
+          SELECT song_name, song_path, duration, album, cover_path, artist, favorite, fav_date, plays
           FROM songs 
           WHERE favorite =1
           ORDER BY fav_date ASC`).all();
@@ -351,7 +353,8 @@ ipcMain.handle('favs', async()=>{
         cover: row.cover_path,
         album: row.album,
         is_fav: row.favorite,
-        fav_date: row.fav_date
+        fav_date: row.fav_date,
+        plays: row.plays
     }));
     return fav_list;
 });
@@ -389,7 +392,8 @@ ipcMain.handle('get-all-playlists-obj', async (event) => {
             cover: row.cover_path,
             album: row.album,
             is_fav: row.favorite,
-            fav_date: row.fav_date
+            fav_date: row.fav_date,
+            plays: row.plays
         }));
         playlist_obj[i]={
             name:playlists_list[i].name,
@@ -408,6 +412,15 @@ ipcMain.on('show-native-menu', async (event, data) => {
     // (Using your existing DB logic)
     const playlists = db.prepare('SELECT * FROM playlists ORDER BY name ASC').all();
     const template = [
+        {
+            label: 'Add to Queue',
+            click: () => {
+                // Send the song data back to the renderer window that opened this menu
+                event.sender.send('add-to-queue', data.id);
+            }
+        },
+        // Visual line separator
+        { type: 'separator' },
         {
             label: 'Add to Playlist',
             submenu: [
@@ -484,6 +497,13 @@ ipcMain.handle('log-history', async (event, songData) => {
     };
     history.unshift(entry); // Newest at the top
     fs.writeFileSync(filePath, JSON.stringify(history, null, 2));
+    if(songData.ms_played>=songData.duration){
+        db.prepare(`
+            UPDATE songs
+            SET plays = plays+1
+            WHERE song_id = ?
+            `).run(songData.id);
+    }
     return { success: true };
 });
 
@@ -500,7 +520,7 @@ ipcMain.handle('get-settings', async () => {
         return JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
     }
     // Default settings if file doesn't exist
-    return { isShuffle: false, repeatMode: 0 }; 
+    return { isShuffle: false, repeatMode: 0, pr_color: "8324c2e8", sec_color1: "fa6800fc", sec_color2: "27f1f1" }; 
 });
 ipcMain.handle('db-exists', async =>{
     if(fs.existsSync(dbPath)){
@@ -573,7 +593,7 @@ ipcMain.handle('save-details', async (event,{name, id, cover, type}) => {
         }
     }
     else{
-        const old_name =id;
+        const old_name = id;
         if(type == "album"){
         try {
             if(name==null){
