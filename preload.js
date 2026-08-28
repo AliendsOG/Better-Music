@@ -8,6 +8,7 @@ contextBridge.exposeInMainWorld('api', {
     // NEW: A way for the UI to know when the scan is done
     onScanFinished: (callback) => ipcRenderer.on('scan-finished', () => callback()),
     getAlbums: () => ipcRenderer.invoke('get-all-albums'),
+    getSongs: () => ipcRenderer.invoke('get-all-songs-obj'),
     getBands: () => ipcRenderer.invoke('get-all-bands'),
     getBase64: (path) => ipcRenderer.invoke('get-base64', path),
     set_fav: (path)=> ipcRenderer.invoke('set-as-fav',path),

@@ -12,12 +12,11 @@ function createWindow() {
     icon: path.join(__dirname, 'assets/logo.ico'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
-      nodeIntegration: false // This allows your app to use PC features
+      nodeIntegration: false 
     },
     show: false,
   });
 
-  // This loads your existing frontend
   win.loadFile('index.html'); 
   win.once('ready-to-show', () => {
     win.show();
@@ -26,7 +25,7 @@ function createWindow() {
 //cover extraction
 const fs = require('fs');
 const mm = require('music-metadata');
-const crypto = require('crypto'); // To create unique names for images
+const crypto = require('crypto'); 
 
 async function handleCoverArt(metadata, songFilePath) {
     const picture = metadata.common.picture && metadata.common.picture[0];
@@ -37,32 +36,28 @@ async function handleCoverArt(metadata, songFilePath) {
       for (const name of commonNames) {
           const fullImagePath = path.join(folderPath, name);
           if (fs.existsSync(fullImagePath)) {
-              return fullImagePath; // Return the path to the actual JPG/PNG file
+              return fullImagePath; 
           }
       }
     }
     if (picture) {
-        // 1. Create a "covers" folder if it doesn't exist
         const coversDir = path.join(app.getPath('userData'), 'covers');
         if (!fs.existsSync(coversDir)) fs.mkdirSync(coversDir);
 
-        // 2. Generate a unique filename based on the data (so we don't save duplicates)
         const hash = crypto.createHash('md5').update(picture.data).digest('hex');
         const fileName = `${hash}.jpg`;
         const filePath = path.join(coversDir, fileName);
 
-        // 3. Save the image to your hard drive if it's not already there
         if (!fs.existsSync(filePath)) {
             fs.writeFileSync(filePath, picture.data);
         }
 
-        return filePath; // This is what we store in the DB
+        return filePath; 
     }
-    return null; // No cover found
+    return null; 
 }
-//music metadata extraction
+
 async function scanDirectory(dirPath) {
-    // 1. Read everything inside the folder (files and subfolders)
     const items = fs.readdirSync(dirPath);
 
     for (const item of items) {
@@ -70,19 +65,16 @@ async function scanDirectory(dirPath) {
         const stat = fs.statSync(fullPath);
 
         if (stat.isDirectory()) {
-            // 2. If it's a folder, "Recurse" (dive inside it)
             await scanDirectory(fullPath);
         } else {
-            // 3. If it's a file, check the extension
             const ext = path.extname(fullPath).toLowerCase();
             if (['.mp3', '.flac', '.wav', '.ogg', '.m4a','aac','aiff','aif'].includes(ext)) {
                 try {
-                    // 4. Extract the Metadata (Artist, Title, etc.)
                     const metadata = await mm.parseFile(fullPath);
                     const coverPath = await handleCoverArt(metadata,fullPath);
                     const cleanPath = fullPath.split(path.sep).join('/'); 
                     const songData = {
-                        song_name: metadata.common.title || item, // Fallback to filename if no tag
+                        song_name: metadata.common.title || item, 
                         artist: metadata.common.artist || 'Unknown Artist',
                         album: metadata.common.album || 'Unknown Album',
                         song_path: cleanPath,
@@ -90,7 +82,6 @@ async function scanDirectory(dirPath) {
                         duration: metadata.format.duration,
                         track_number: metadata.common.track.no
                     };
-                    // 5. Save it to your SQLite Database
                     saveToDatabase(songData);
                     
                 } catch (error) {
@@ -108,7 +99,7 @@ function saveToDatabase(song) {
     insert.run(song.song_name, song.artist, song.album, song.song_path, song.cover_path, song.duration, song.track_number);
 }
 
-const dbPath = path.join(app.getPath('userData'), 'library.db');
+const dbPath = 'library.db';
 const db = new Database(dbPath, { 
     verbose: console.log 
 });
@@ -129,7 +120,6 @@ const setupDatabase = () => {
         )
     `).run();
 
-    // 2. Create Playlists second
     db.prepare(`
         CREATE TABLE IF NOT EXISTS playlists (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -139,7 +129,6 @@ const setupDatabase = () => {
         )
     `).run();
 
-    // 3. Create the link table LAST
     db.prepare(`
         CREATE TABLE IF NOT EXISTS playlist_songs (
             playlist_id INTEGER,
@@ -152,25 +141,15 @@ const setupDatabase = () => {
 };
 function get_albume(albumName){
   try {
-      // Use .all() to get an array of all matching songs
       const songs = db.prepare(`
-          SELECT song_name, song_path, duration, album, artist, favorite, song_id, cover_path, plays
+          SELECT song_id
           FROM songs 
           WHERE album = ?
           ORDER BY track_number ASC
-      `).all(albumName);
-      const piese = songs.map(row => ({
-        name: row.song_name,
-        path: row.song_path,
-        album: row.album,
-        duration: row.duration,
-        artist: row.artist,
-        is_fav: row.favorite,
-        id: row.song_id,
-        cover: row.cover_path,
-        plays:row.plays
-      }));
-      return piese;
+      `).pluck().all(albumName);
+      console.log(songs);
+      return songs;
+
   } catch (error) {
       console.error("Search error:", error);
       return [];
@@ -187,7 +166,6 @@ function create_playlist(name) {
 }
 function add_to_playlist(playlistId, songId) {
     try {
-        // This subquery automatically calculates the next order_index
         const query = `
             INSERT INTO playlist_songs (playlist_id, song_id, order_index)
             VALUES (?, ?, (SELECT IFNULL(MAX(order_index), 0) + 1 
@@ -202,23 +180,21 @@ function add_to_playlist(playlistId, songId) {
 //IPC main handle stuff
 ipcMain.handle('select-folder', async () => {
   const result = await dialog.showOpenDialog({
-      properties: ['openDirectory'] // Tell Windows we only want Folders, not individual files
+      properties: ['openDirectory'] 
   });
   if (result.canceled) {
-      return null; // User clicked "Cancel"
+      return null; 
   } else {
-      const folderPath = result.filePaths[0]; // Get the first folder they picked
+      const folderPath = result.filePaths[0]; 
       return folderPath;
   }
 });
 ipcMain.on('scan-folder', async (event, folderPath) => {
   await scanDirectory(folderPath);
-  // Tell the UI the database is updated
   event.reply('scan-finished'); 
 });
 ipcMain.handle('get-all-albums', async () => {
     try {
-        // We group by album to get one entry per album name
         const albums = db.prepare(`
             SELECT DISTINCT album, cover_path, artist
             FROM songs 
@@ -229,65 +205,43 @@ ipcMain.handle('get-all-albums', async () => {
           name: row.album,
           cover: row.cover_path,
           artist: row.artist,
-          song: get_albume(row.album)
+          songs: get_albume(row.album)
         }));
         return albume;
     } catch (error) {
         console.error("Failed to fetch albums:", error);
         return [];
     }
-    //Gemini smarter 1 query method 
-    // try {
-    //     // 1. Fetch everything at once (Synchronous)
-    //     // We order by album and track_number so the grouping is already sorted
-    //     const allSongs = db.prepare(`
-    //         SELECT song_name, song_path, duration, album, artist, favorite, song_id, cover_path, track_number
-    //         FROM songs 
-    //         ORDER BY album ASC, track_number ASC
-    //     `).all();
-
-    //     // 2. The "Box" logic (Grouping)
-    //     const albumMap = allSongs.reduce((acc, row) => {
-    //         const albumName = row.album || "Unknown Album";
-
-    //         if (!acc[albumName]) {
-    //             acc[albumName] = {
-    //                 name: albumName,
-    //                 artist: row.artist,
-    //                 cover: row.cover_path,
-    //                 songs: []
-    //             };
-    //         }
-
-    //         acc[albumName].songs.push({
-    //             name: row.song_name,
-    //             path: row.song_path,
-    //             album: row.album,
-    //             duration: row.duration,
-    //             artist: row.artist,
-    //             is_fav: row.favorite,
-    //             id: row.song_id,
-    //             cover: row.cover_path,
-    //             track_num: row.track_number
-    //         });
-
-    //         return acc;
-    //     }, {});
-
-    //     // 3. Return as an array
-    //     return Object.values(albumMap);
 });
+ipcMain.handle('get-all-songs-obj', async (event) => {
+    try {
+        const songs = db.prepare('SELECT * FROM songs').all();
+        const songs_list = songs.map(row=>({
+            name: row.song_name,
+            path: row.song_path,
+            album: row.album,
+            duration: row.duration,
+            artist: row.artist,
+            is_fav: row.favorite,
+            id: row.song_id,
+            cover: row.cover_path,
+            plays: row.plays,
+        }));
+    return songs_list;
+    } catch (error) {
+        console.error("Failed to fetch artists:", error);
+        return [];
+    }
 
+});
 ipcMain.handle('get-all-bands', async () => {
     try {
         const artists = db.prepare('SELECT DISTINCT artist FROM songs ORDER BY artist ASC').all();
         const artistList = artists.map(row => {
             const artistName = row.artist;
-            // 2. For each artist, get their unique albums
             const albums = db.prepare('SELECT DISTINCT album FROM songs WHERE artist = ? ORDER BY album ASC')
                 .all(artistName)
-                .map(albumRow => albumRow.album); // Flatten to a simple array of strings
-            // 3. Return the structured object
+                .map(albumRow => albumRow.album); 
             return {
                 name: artistName,
                 albums: albums
@@ -325,10 +279,9 @@ ipcMain.handle('set-as-fav', async (event ,id) =>{
     `).run(id);
     return null;
 });
-const filePath = path.join(app.getPath('userData'), 'playback.json');
-
+// const filePath = path.join(app.getPath('userData'), 'playback.json');
+const filePath ='playback.json';
 ipcMain.handle('last-played', async(event, {queue, index, da}) =>{
-    // Convert array to object if you want numeric keys
     if(da==true){
         fs.writeFileSync(filePath, JSON.stringify({ queue, index }, null, 2), 'utf-8');
     }
@@ -341,32 +294,20 @@ const loadPlayback = () => {
 };
 ipcMain.handle('favs', async()=>{
     const favs= db.prepare(`
-          SELECT song_name, song_path, duration, album, cover_path, artist, favorite, fav_date, plays
+          SELECT song_id
           FROM songs 
           WHERE favorite =1
-          ORDER BY fav_date ASC`).all();
-    const fav_list=favs.map(row =>({
-        name: row.song_name,
-        path: row.song_path,
-        artist: row.artist,
-        duration: row.duration,
-        cover: row.cover_path,
-        album: row.album,
-        is_fav: row.favorite,
-        fav_date: row.fav_date,
-        plays: row.plays
-    }));
-    return fav_list;
+          ORDER BY fav_date ASC`).pluck().all();
+    return favs;
 });
 ipcMain.handle('create-playlist', async (event, name) => {
     create_playlist(name);
 });
 
-// 3. Add a song to a specific playlist
 ipcMain.handle('add-to-playlist', async (event, { playlistId, songId }) => {
     add_to_playlist(playlistId, songId);
 });
-// 2. Get all playlist names (for your sidebar/navigation)
+
 ipcMain.handle('get-all-playlists-obj', async (event) => {
     let playlists=db.prepare('SELECT * FROM playlists ORDER BY name ASC').all();
     const playlists_list=playlists.map(row =>({
@@ -377,27 +318,17 @@ ipcMain.handle('get-all-playlists-obj', async (event) => {
     
     let playlist_obj=[];
     const query = `
-        SELECT s.* FROM songs s
+        SELECT s.song_id FROM songs s
         JOIN playlist_songs ps ON s.song_id = ps.song_id
         WHERE ps.playlist_id = ?
         ORDER BY ps.order_index ASC
     `;
     for(let i=0;i<playlists_list.length;i++){
-        const songs=db.prepare(query).all(playlists_list[i].id);
-        const song= songs.map(row =>({
-            name: row.song_name,
-            path: row.song_path,
-            artist: row.artist,
-            duration: row.duration,
-            cover: row.cover_path,
-            album: row.album,
-            is_fav: row.favorite,
-            fav_date: row.fav_date,
-            plays: row.plays
-        }));
+        const songs=db.prepare(query).pluck().all(playlists_list[i].id);
+        console.log(songs);
         playlist_obj[i]={
             name:playlists_list[i].name,
-            songs:song,
+            songs:songs ,
             cover:playlists_list[i].cover,
             id:playlists_list[i].id
         }
@@ -408,18 +339,14 @@ ipcMain.handle('get-all-playlists-obj', async (event) => {
 
 ipcMain.on('show-native-menu', async (event, data) => {
     console.log("Main process received show-native-menu for ID:", data.id);
-    // 1. Fetch current playlists to build the submenu
-    // (Using your existing DB logic)
     const playlists = db.prepare('SELECT * FROM playlists ORDER BY name ASC').all();
     const template = [
         {
             label: 'Add to Queue',
             click: () => {
-                // Send the song data back to the renderer window that opened this menu
                 event.sender.send('add-to-queue', data.id);
             }
         },
-        // Visual line separator
         { type: 'separator' },
         {
             label: 'Add to Playlist',
@@ -428,14 +355,11 @@ ipcMain.on('show-native-menu', async (event, data) => {
                     label: `＋ Create Playlist: "${data.title}"`,
                     click: () => {
                         try {
-                            // 1. Create the playlist using the song's title
                             const insertPl = create_playlist(data.title);
                             const newPlId = insertPl.lastInsertRowid;
-                            // 2. Immediately add the song to this new playlist
                             add_to_playlist(newPlId, data.id);       
                         }
                         catch (err) {
-                            // If playlist name already exists, you might want to just add the song to it
                             console.error("Error auto-creating playlist:", err.message);
                         }
                     }
@@ -459,13 +383,12 @@ ipcMain.on('show-native-menu', async (event, data) => {
 });
 
 const os = require('os');
-const MAX_SONGS_PER_FILE = 1000; // Spotify uses file size, but song count is easier
-const historyDir = path.join(app.getPath('userData'), 'History');
-
+const MAX_SONGS_PER_FILE = 1000; 
+// const historyDir = path.join(app.getPath('userData'), 'History');
+const historyDir = 'History';
 if (!fs.existsSync(historyDir)) fs.mkdirSync(historyDir);
 
 ipcMain.handle('log-history', async (event, songData) => {
-    // 1. Get all history files and sort them numerically
     let files = fs.readdirSync(historyDir)
         .filter(f => f.startsWith('history_'))
         .sort((a, b) => parseInt(b.split('_')[1]) - parseInt(a.split('_')[1]));
@@ -476,26 +399,24 @@ ipcMain.handle('log-history', async (event, songData) => {
     if (fs.existsSync(filePath)) {
         history = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
     }
-    // 2. Check if current file is full
     if (history.length >= MAX_SONGS_PER_FILE) {
         let nextIndex = parseInt(currentFile.split('_')[1]) + 1;
         currentFile = `history_${nextIndex}.json`;
         filePath = path.join(historyDir, currentFile);
-        history = []; // Start fresh array for new file
+        history = []; 
     }
-    // 3. Add new play entry (Spotify style)
     const entry = {
         ts: new Date().toISOString(),
         track_name: songData.name,
         artist_name: songData.artist,
         album_name: songData.album,
         ms_played: Math.floor(songData.ms_played || 0),
-        total_ms: Math.floor((songData.duration || 0) * 1000), // Convert seconds to ms
+        total_ms: Math.floor((songData.duration || 0) * 1000), 
         skipped: songData.skipped || false,
         device_name: os.hostname(),
         platform: os.platform()
     };
-    history.unshift(entry); // Newest at the top
+    history.unshift(entry); 
     fs.writeFileSync(filePath, JSON.stringify(history, null, 2));
     if(songData.ms_played>=songData.duration){
         db.prepare(`
@@ -507,7 +428,8 @@ ipcMain.handle('log-history', async (event, songData) => {
     return { success: true };
 });
 
-const settingsPath = path.join(app.getPath('userData'), 'settings.json');
+// const settingsPath = path.join(app.getPath('userData'), 'settings.json');
+const settingsPath = 'settings.json';
 
 // Handle saving settings
 ipcMain.on('save-settings', (event, settings) => {
@@ -520,7 +442,7 @@ ipcMain.handle('get-settings', async () => {
         return JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
     }
     // Default settings if file doesn't exist
-    return { isShuffle: false, repeatMode: 0, pr_color: "8324c2e8", sec_color1: "fa6800fc", sec_color2: "27f1f1" }; 
+    return { isShuffle: false, repeatMode: 0, pr_color: "#8324c2", sec_color1: "#fa6800", sec_color2: "#27f1f1" }; 
 });
 ipcMain.handle('db-exists', async =>{
     if(fs.existsSync(dbPath)){

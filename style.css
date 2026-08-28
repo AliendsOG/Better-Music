@@ -27,9 +27,9 @@ body.modal-open {
     position: relative;
 }
 .glossy{
-    background-color: var(--navbar)!important;
+    background-color: var(--navbar);
     border-radius: 23px ;
-    backdrop-filter: blur(24px)!important;
+    backdrop-filter: blur(24px);
 }
 .section-text{
     color:white !important;
@@ -49,7 +49,7 @@ body.modal-open {
     flex-shrink: 0; 
     margin-right: 24px;
     contain: paint;
-    background-color: rgba(0,0,0,0.001);
+    background-color: var(--navbar);
     cursor: pointer;
 
 }
@@ -214,7 +214,7 @@ body.modal-open {
 
 .song-item{
     transition: 0.2s;
-    background-color: transparent!important;
+    background-color: transparent;
     cursor: pointer;
 }
 .exit_button{
@@ -388,6 +388,15 @@ body.modal-open {
     padding: 20px!important;
     border-bottom-left-radius: 0px !important;
     border-bottom-right-radius: 0px !important;
+}
+.settings-padding{
+    padding: 11px !important;
+}
+.setting-option{
+    margin-top: 11px;
+}
+.set-import{
+    margin-left: 11px;
 }
 /* fundal */
 .circle {

@@ -59,6 +59,10 @@
 .section-text{
     font-size: 48px;
 }
+.settings-text{
+    line-height: 43px;
+    font-size: 38px;
+}
 .no-song-text{
     margin-top:120px;
     margin-bottom: 2000px;
@@ -284,8 +288,7 @@
     border-radius: 11px;
     border: none !important;
     box-shadow: none !important;
-    height: 34px;
-    margin-bottom: 4px;
+    height:34px;
 }
 
 @media(max-width:1000px) {
